@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent)
   , ui(new Ui::MainWindow)
 {
   ui->setupUi(this);
+  //this->setCentralWidget();
 
   ui->tableResult->setDragEnabled(true);
   ui->tableExclude->setDragEnabled(true);
@@ -33,9 +34,8 @@ MainWindow::MainWindow(QWidget *parent)
 
   int column = 0;
   int row = 0;
-  ui->tableResult->insertColumn(column);
-  ui->tableExclude->insertColumn(column);
-  ui->tableExclude->setColumnWidth(column, 300);
+
+  ui->tableExclude->setColumnWidth(column, 400);
   ui->tableExclude->insertRow(row);
   ui->tableExclude->setItem(row, column, new QTableWidgetItem{"Testeintrag"});
   ui->tableResult->setToolTip("Drag And Drop Elements.");
