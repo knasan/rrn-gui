@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QString>
 #include <QLineEdit>
+#include <QPushButton>
+#include <QDirIterator>
+#include <QTableWidget>
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
@@ -34,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   ui->tableExclude->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
   ui->tableExclude->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  ui->tableExclude->verticalHeader()->setVisible(false);
 
   // Disable Buttons
   ui->pushButton_DoIt->setDisabled(true);
@@ -43,8 +47,6 @@ MainWindow::MainWindow(QWidget *parent)
   ui->lineEdit_Search->setDisabled(true);
   ui->lineEdit_Replace->setDisabled(true);
 
-  // Hide Progressbar
-  //ui->progressBar->setHidden(true);
 }
 
 MainWindow::~MainWindow()
@@ -52,7 +54,7 @@ MainWindow::~MainWindow()
   delete ui;
 }
 
-// Slot Push Button Destination.
+// Slot PushButton Destination.
 void MainWindow::on_pushButton_Destination_clicked()
 {
   QString dir = QFileDialog::getExistingDirectory(
@@ -64,15 +66,41 @@ void MainWindow::on_pushButton_Destination_clicked()
 
   if (dir != "")
     {
+      // Enable Collect button
       ui->pushButton_Collect->setEnabled(true);
+      // set directory in the LineEdit Destination
       ui->lineEdit_Destination->setText(dir);
+
+      // Enable Search and Replace LineEdit
       ui->lineEdit_Search->setDisabled(false);
       ui->lineEdit_Replace->setDisabled(false);
-
-      // statt einen Button, könnte man auch sofort mit dem einlesen beginnen.
-      // nachteil wäre hier, das der Benutzer nicht mehr die Wahl hat dies zu korrigieren.
-      // Bei diese Methode muss der Benutzer aktiv werden um die Daten einzusammeln.
-      // Was mehr Kontrolle verspricht.
     }
 }
 
+void MainWindow::listDirectory(QString dir)
+{
+  QDirIterator it(dir, QDirIterator::Subdirectories);
+  int row = 0, col = 0;
+  while (it.hasNext()) {
+      if(it.fileName() == "." || it.fileName() == ".." || it.fileName() == "")
+        {
+          it.next();
+          continue;
+        }
+      ui->tableResult->insertRow(row);
+      ui->tableResult->setItem(row,col, new QTableWidgetItem(it.path()+"/"+it.fileName()));
+      row++;
+      it.next();
+    }
+  ui->tableExclude->setRowCount(row);
+}
+
+void MainWindow::on_pushButton_Collect_clicked()
+{
+  // Clear the Table for New Results
+  ui->tableResult->clearContents();
+  ui->tableResult->setRowCount(0);
+
+  // listDirectory fill the Table (TODO: refactor this name)
+  listDirectory(ui->lineEdit_Destination->text());
+}

@@ -25,6 +25,9 @@
   <property name="autoFillBackground">
    <bool>true</bool>
   </property>
+  <property name="locale">
+   <locale language="English" country="UnitedStates"/>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
@@ -39,23 +42,11 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>150</width>
-            <height>30</height>
-           </size>
-          </property>
           <property name="locale">
            <locale language="English" country="UnitedStates"/>
           </property>
           <property name="text">
-           <string>Choose a destination</string>
+           <string>Select directory</string>
           </property>
          </widget>
         </item>
@@ -68,7 +59,7 @@
            <locale language="English" country="UnitedStates"/>
           </property>
           <property name="text">
-           <string>Destination ....</string>
+           <string>select directory</string>
           </property>
          </widget>
         </item>
@@ -89,7 +80,7 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
-            <string>Search ...</string>
+            <string>such a sign or word</string>
            </property>
            <property name="clearButtonEnabled">
             <bool>true</bool>
@@ -102,7 +93,7 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
-            <string>Replace to ....</string>
+            <string>replace to</string>
            </property>
            <property name="clearButtonEnabled">
             <bool>true</bool>
@@ -130,7 +121,7 @@
          <locale language="English" country="UnitedStates"/>
         </property>
         <property name="text">
-         <string>Collect Destination</string>
+         <string>Collect Data</string>
         </property>
        </widget>
       </item>
@@ -173,7 +164,7 @@
         </property>
         <column>
          <property name="text">
-          <string>Results</string>
+          <string>Files in directory</string>
          </property>
          <property name="font">
           <font>
