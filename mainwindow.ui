@@ -124,7 +124,7 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
-            <string>such a sign or word</string>
+            <string>search</string>
            </property>
            <property name="clearButtonEnabled">
             <bool>true</bool>
@@ -149,10 +149,38 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
-            <string>replace to</string>
+            <string>replace</string>
            </property>
            <property name="clearButtonEnabled">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_message_search">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_message_excludes">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_message_replace">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_message_doit">
+           <property name="text">
+            <string>TextLabel</string>
            </property>
           </widget>
          </item>
@@ -296,7 +324,11 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QStatusBar" name="statusbar">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections>
