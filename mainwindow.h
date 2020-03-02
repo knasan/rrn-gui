@@ -5,29 +5,34 @@
 #include <QTableWidget>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow; }
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
-public:
+ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
-private slots:
+ private slots:
   void on_pushButton_Destination_clicked();
   void on_pushButton_Collect_released();
   void on_pushButton_Collect_pressed();
-  /*void on_pushButton_Collect_clicked();
-  void on_pushButton_Collect_toggled();*/
+  void on_tableResult_itemDoubleClicked(QTableWidgetItem *item);
 
-signals:
+  void on_tableExclude_itemDoubleClicked(QTableWidgetItem *item);
 
-private:
+ signals:
+
+ private:
   Ui::MainWindow *ui;
-
   void insertTableResult(int row, int col, QString text);
+  // Check ist item->text() a directory? for each contain the text
+  // Delete fromTbl and copy to toTbl
+  void directoryTableCheck(QTableWidgetItem *item, QTableWidget *fromTbl,
+                           QTableWidget *toTbl);
 };
-#endif // MAINWINDOW_H
+#endif  // MAINWINDOW_H

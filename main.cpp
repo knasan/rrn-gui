@@ -1,11 +1,10 @@
-#include "mainwindow.h"
-
 #include <QApplication>
 #include <QDebug>
 #include <QTranslator>
 
-int main(int argc, char *argv[])
-{
+#include "mainwindow.h"
+
+int main(int argc, char *argv[]) {
   QTranslator translator;
   translator.load("rrn-gui_de_DE");
 
