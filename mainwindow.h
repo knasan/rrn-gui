@@ -22,7 +22,6 @@ class MainWindow : public QMainWindow {
   void on_pushButton_Collect_released();
   void on_pushButton_Collect_pressed();
   void on_tableResult_itemDoubleClicked(QTableWidgetItem *item);
-
   void on_tableExclude_itemDoubleClicked(QTableWidgetItem *item);
 
  signals:
@@ -32,7 +31,7 @@ class MainWindow : public QMainWindow {
   void insertTableResult(int row, int col, QString text);
   // Check ist item->text() a directory? for each contain the text
   // Delete fromTbl and copy to toTbl
-  void directoryTableCheck(QTableWidgetItem *item, QTableWidget *fromTbl,
-                           QTableWidget *toTbl);
+  void switchTable(QTableWidgetItem *item, QTableWidget *fromTbl,
+                   QTableWidget *toTbl);
 };
 #endif  // MAINWINDOW_H

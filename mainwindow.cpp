@@ -25,33 +25,24 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
-  // Enable Drag and Drop in QTableWidget
-  ui->tableResult->setDragEnabled(true);
-  ui->tableResult->dragEnabled();
-  ui->tableResult->setDragDropMode(QAbstractItemView::DragDrop);
+  // TODO: DragDrop
+  /*
+    ui->tableResult->setDragEnabled(false);
+    ui->tableExclude->setDragEnabled(false);
 
-  ui->tableExclude->setDragEnabled(true);
-  ui->tableExclude->dragEnabled();
-  ui->tableExclude->setDragDropMode(QAbstractItemView::DragDrop);
+    ui->tableResult->setDragDropMode(QAbstractItemView::NoDragDrop);  //
+    DragOnly ui->tableResult->setDragDropOverwriteMode(false);
 
-  // Grid disabled
-  ui->tableResult->setShowGrid(false);
-  ui->tableExclude->setShowGrid(false);
+    ui->tableExclude->setDragDropMode(QAbstractItemView::NoDragDrop);
+    ui->tableExclude->setDragDropOverwriteMode(false);
 
+    // Grid disabled
+    // ui->tableResult->setShowGrid(false);
+    // ui->tableExclude->setShowGrid(false);
+  */
   // Enabled sorted
   ui->tableResult->setSortingEnabled(true);
   ui->tableExclude->setSortingEnabled(true);
-
-  // Enable Drag and Drop
-  ui->tableResult->setDragEnabled(true);
-  ui->tableResult->setDragDropOverwriteMode(true);
-  ui->tableResult->setDragDropMode(QAbstractItemView::DragDrop);
-  ui->tableResult->setDefaultDropAction(Qt::CopyAction);
-
-  ui->tableExclude->setDragEnabled(true);
-  ui->tableExclude->setDragDropOverwriteMode(true);
-  ui->tableExclude->setDragDropMode(QAbstractItemView::DragDrop);
-  ui->tableExclude->setDefaultDropAction(Qt::CopyAction);
 
   // 100% Stretch Column
   ui->tableResult->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -146,18 +137,19 @@ void MainWindow::on_pushButton_Collect_released() {
     row++;
   }
 
-  ui->statusbar->showMessage(
-      tr("You can move files that you want to exclude to the exclude table."),
-      0);
+  ui->statusbar->showMessage(tr("You can move files that you want to exclude "
+                                "to the exclude table with doubleclick."),
+                             0);
 
-  QString message_search = tr(
-      "Enter a character or word in the search field that you want to search.");
+  QString message_search =
+      tr("Enter a character or word into the search box that you want to "
+         "search.");
   QString message_replace =
-      tr("Enter a character or word in the replace field.");
+      tr("Enter a character or word into the replace box.");
   QString message_exclude =
-      tr("You can move files that you want to exclude to the excludes table.");
-  QString message_doit =
-      tr("When you are satisfied, press the 'Do it' button.\n");
+      tr("You can move files that you want to exclude to the excludes table "
+         "with doubleclick.");
+  QString message_doit = tr("If you are satisfied, press the 'Do it' button.");
 
   ui->label_message_search->setText(message_search);
   ui->label_message_replace->setText(message_replace);
@@ -171,12 +163,11 @@ void MainWindow::insertTableResult(int row, int col, QString text) {
 }
 
 void MainWindow::on_tableResult_itemDoubleClicked(QTableWidgetItem *item) {
-  directoryTableCheck(item, ui->tableResult, ui->tableExclude);
+  switchTable(item, ui->tableResult, ui->tableExclude);
 }
 
-void MainWindow::directoryTableCheck(QTableWidgetItem *item,
-                                     QTableWidget *fromTbl,
-                                     QTableWidget *toTbl) {
+void MainWindow::switchTable(QTableWidgetItem *item, QTableWidget *fromTbl,
+                             QTableWidget *toTbl) {
   QString itemText = item->text();
   int rowCountToTbl = toTbl->rowCount();
   toTbl->insertRow(rowCountToTbl);
@@ -185,12 +176,9 @@ void MainWindow::directoryTableCheck(QTableWidgetItem *item,
 }
 
 void MainWindow::on_tableExclude_itemDoubleClicked(QTableWidgetItem *item) {
-  directoryTableCheck(item, ui->tableExclude, ui->tableResult);
+  switchTable(item, ui->tableExclude, ui->tableResult);
 }
 
-/*
- * Workers, TODO: outsorce to extra file
- */
 void workerGetFiles(QString dir) {
   // collectDataFiles Threaded
   QFuture<void> t1 = QtConcurrent::run(getFiles, dir, &collectDataFiles);
