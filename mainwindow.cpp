@@ -15,12 +15,7 @@
 #include "ui_mainwindow.h"
 
 // TODO: ein Connect erstellen das ein bestimmtes message ausgeblendet wird,
-// wenn in das Feld etwas eingetragen wird. Gibt es ein Trigger wenn man in das
-// feld klickt, das der eintrag gelöscht wird? Dies könnte man mit den QTimer
-// machen, so wurde es auch im C++ Installer mal gemacht. EVtl. dort mal
-// reinschauen. Kontextmenü für die Tabellen. Move (also verschieben)! Hierfür
-// benötigt man vermutlich einen Connect von SIGNAL und SLOT das die ausgewählte
-// spalte entfernt wird oder eben wieder eingefügt wird.
+// wenn in das Feld etwas eingetragen oder aktiviert ist/wird.
 
 QStringList collectDataFiles;
 void getFiles(QString dir, QStringList *collectDataFiles);
@@ -176,7 +171,6 @@ void MainWindow::insertTableResult(int row, int col, QString text) {
 }
 
 void MainWindow::on_tableResult_itemDoubleClicked(QTableWidgetItem *item) {
-  // Check file or dir function
   directoryTableCheck(item, ui->tableResult, ui->tableExclude);
 }
 
@@ -187,8 +181,6 @@ void MainWindow::directoryTableCheck(QTableWidgetItem *item,
   int rowCountToTbl = toTbl->rowCount();
   toTbl->insertRow(rowCountToTbl);
   toTbl->setItem(rowCountToTbl, 0, new QTableWidgetItem(item->text()));
-  // fromTbl->update();
-  // toTbl->update();
   fromTbl->removeRow(item->row());
 }
 
