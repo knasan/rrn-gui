@@ -170,14 +170,14 @@
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_message_excludes">
+          <widget class="QLabel" name="label_message_replace">
            <property name="text">
             <string>TextLabel</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="label_message_replace">
+          <widget class="QLabel" name="label_message_excludes">
            <property name="text">
             <string>TextLabel</string>
            </property>
