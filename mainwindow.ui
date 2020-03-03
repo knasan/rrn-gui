@@ -124,6 +124,9 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
             <string>search</string>
            </property>
            <property name="clearButtonEnabled">
@@ -149,6 +152,9 @@
             <locale language="English" country="UnitedStates"/>
            </property>
            <property name="text">
+            <string/>
+           </property>
+           <property name="placeholderText">
             <string>replace</string>
            </property>
            <property name="clearButtonEnabled">
@@ -356,7 +362,7 @@
      <x>0</x>
      <y>0</y>
      <width>768</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
