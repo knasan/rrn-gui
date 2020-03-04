@@ -1,7 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QAction>
 #include <QMainWindow>
+#include <QMenu>
 #include <QTableWidget>
 
 QT_BEGIN_NAMESPACE
@@ -24,10 +26,11 @@ class MainWindow : public QMainWindow {
   void on_pushButton_DoIt_clicked();
   void on_lineEdit_Search_editingFinished();
   void on_lineEdit_Replace_editingFinished();
-
-  // void customMenuRequested(QPoint pos);
-
+  void customMenuRequested(QPoint pos);
   void on_tableFilesToRename_itemDoubleClicked(QTableWidgetItem *item);
+  void switchColum(bool trigger);
+
+  void on_actionAdd_exclude_triggered();
 
  signals:
 

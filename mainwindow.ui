@@ -317,7 +317,7 @@
      <x>0</x>
      <y>0</y>
      <width>768</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
@@ -326,6 +326,11 @@
     <bool>true</bool>
    </property>
   </widget>
+  <action name="actionAdd_exclude">
+   <property name="text">
+    <string>Add exclude</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections>

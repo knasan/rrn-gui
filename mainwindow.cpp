@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 
+#include <QAction>
 #include <QDebug>
 #include <QDirIterator>
 #include <QFileDialog>
@@ -15,9 +16,6 @@
 
 #include "ui_mainwindow.h"
 
-// TODO: ein Connect erstellen das ein bestimmtes message ausgeblendet wird,
-// wenn in das Feld etwas eingetragen oder aktiviert ist/wird.
-
 QStringList collectDataFiles;
 void getFiles(QString dir, QStringList *collectDataFiles);
 void workerGetFiles(QString dir);
@@ -30,10 +28,10 @@ MainWindow::MainWindow(QWidget *parent)
   ui->tableFilesToRename->setDragEnabled(true);
 
   // Context Menu
-  // ui->tableFilesToRename->setContextMenuPolicy(Qt::CustomContextMenu);
-  /*QObject::connect(ui->tableFilesToRename,
+  ui->tableFilesToRename->setContextMenuPolicy(Qt::CustomContextMenu);
+  QObject::connect(ui->tableFilesToRename,
                    SIGNAL(customContextMenuRequested(QPoint)),
-                   SLOT(customMenuRequested(QPoint)));*/
+                   SLOT(customMenuRequested(QPoint)));
 
   // ui->tableFilesToRename->setDragDropMode(QAbstractItemView::DragDrop);
   // ui->tableFilesToRename->setAttribute(Qt::WidgetAttribute::WA_AcceptDrops);
@@ -244,13 +242,17 @@ void MainWindow::on_lineEdit_Replace_editingFinished() {
   ui->labelMessage->setText(message_exclude);
 }
 
-/*void MainWindow::customMenuRequested(QPoint pos) {
-  // QModelIndex index = ui->tableFilesToRename->indexAt(pos);
+void MainWindow::customMenuRequested(QPoint pos) {
+  qDebug() << "CustomMenuRequested, Pos: " << pos;
+
+  // TODO: welche position ist RenameFile und Exclude?
+
   QMenu *menu = new QMenu(this);
-  menu->addAction(new QAction(tr("add to exclude"), this));
+  menu->addAction(tr("add exclude"), this,
+                  SLOT(on_actionAdd_exclude_triggered()));
   // menu->addAction(new QAction("Action 2", this));
   menu->popup(ui->tableFilesToRename->viewport()->mapToGlobal(pos));
-}*/
+}
 
 void MainWindow::on_tableFilesToRename_itemDoubleClicked(
     QTableWidgetItem *item) {
@@ -272,4 +274,13 @@ void MainWindow::on_tableFilesToRename_itemDoubleClicked(
     qDebug() << "Unknown Column";
   }
   ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(text));
+}
+
+void MainWindow::switchColum(bool trigger) {
+  qDebug() << "Rename";
+  qDebug() << "Trigger: " << trigger;
+}
+
+void MainWindow::on_actionAdd_exclude_triggered() {
+  qDebug() << "Exclude trigger";
 }
