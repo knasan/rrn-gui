@@ -28,10 +28,20 @@ MainWindow::MainWindow(QWidget *parent)
 
   // DragDrop
   ui->tableFilesToRename->setDragEnabled(true);
-  ui->tableFilesToRename->setDragDropMode(QAbstractItemView::DragDrop);
-  ui->tableFilesToRename->setAttribute(Qt::WidgetAttribute::WA_AcceptDrops);
-  ui->tableFilesToRename->setDefaultDropAction(Qt::DropAction::MoveAction);
-  ui->tableFilesToRename->setDragDropOverwriteMode(true);
+
+  // Context Menu
+  // ui->tableFilesToRename->setContextMenuPolicy(Qt::CustomContextMenu);
+  /*QObject::connect(ui->tableFilesToRename,
+                   SIGNAL(customContextMenuRequested(QPoint)),
+                   SLOT(customMenuRequested(QPoint)));*/
+
+  // ui->tableFilesToRename->setDragDropMode(QAbstractItemView::DragDrop);
+  // ui->tableFilesToRename->setAttribute(Qt::WidgetAttribute::WA_AcceptDrops);
+  // ui->tableFilesToRename->setDefaultDropAction(Qt::DropAction::MoveAction);
+
+  // Disbable Row/Column edit
+  ui->tableFilesToRename->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  ui->tableResult->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
   // Grid disabled
   // ui->tableFilesToRename->setShowGrid(false);
@@ -45,8 +55,8 @@ MainWindow::MainWindow(QWidget *parent)
       QHeaderView::Stretch);
 
   // Enable Sorting
-  ui->tableFilesToRename->setSortingEnabled(true);
-  ui->tableResult->setSortingEnabled(true);
+  ui->tableFilesToRename->setSortingEnabled(false);
+  ui->tableResult->setSortingEnabled(false);
 
   // Sort by Name
   ui->tableFilesToRename->sortItems(0, Qt::SortOrder::AscendingOrder);
@@ -183,7 +193,6 @@ void MainWindow::on_pushButton_DoIt_clicked() {
   ui->tableResult->show();
   ui->tableResult->setRowCount(rows);
 
-  int count = 0;
   for (int row = 0; row < rows; ++row) {
     QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
     if (origFileName.contains(search, Qt::CaseInsensitive)) {
@@ -193,13 +202,13 @@ void MainWindow::on_pushButton_DoIt_clicked() {
       ui->tableResult->setItem(row, 1, new QTableWidgetItem(newFilename));
       // Function for Rename with Threads
       // Progressbar +1
-      count++;
+    } else {
+      ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
     }
   }
   // Wait for Thread
 
   // Set RealRowCount by Result Table and DoIt button disabled
-  ui->tableResult->setRowCount(count);
   ui->pushButton_DoIt->setDisabled(true);
   ui->statusbar->clearMessage();
 }
@@ -233,4 +242,34 @@ void MainWindow::on_lineEdit_Replace_editingFinished() {
       "You can move files that you want to exclude to the excludes table "
       "with doubleclick.<br>If you are satisfied, press the 'Do it' button.");
   ui->labelMessage->setText(message_exclude);
+}
+
+/*void MainWindow::customMenuRequested(QPoint pos) {
+  // QModelIndex index = ui->tableFilesToRename->indexAt(pos);
+  QMenu *menu = new QMenu(this);
+  menu->addAction(new QAction(tr("add to exclude"), this));
+  // menu->addAction(new QAction("Action 2", this));
+  menu->popup(ui->tableFilesToRename->viewport()->mapToGlobal(pos));
+}*/
+
+void MainWindow::on_tableFilesToRename_itemDoubleClicked(
+    QTableWidgetItem *item) {
+  int column = item->column();
+  int row = item->row();
+  QString text = item->text();
+  if (text == "") {
+    return;
+  }
+  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(""));
+  // Column 0 is FiletoRename, 1 is Exclude
+  if (column == 0) {
+    // FilesToRename -> exclude
+    column++;
+  } else if (column == 1) {
+    // Exclude <- FilesToRename
+    column--;
+  } else {
+    qDebug() << "Unknown Column";
+  }
+  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(text));
 }

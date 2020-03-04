@@ -210,6 +210,9 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="contextMenuPolicy">
+         <enum>Qt::ActionsContextMenu</enum>
+        </property>
         <property name="locale">
          <locale language="English" country="UnitedStates"/>
         </property>
@@ -314,7 +317,7 @@
      <x>0</x>
      <y>0</y>
      <width>768</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

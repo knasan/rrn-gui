@@ -25,6 +25,10 @@ class MainWindow : public QMainWindow {
   void on_lineEdit_Search_editingFinished();
   void on_lineEdit_Replace_editingFinished();
 
+  // void customMenuRequested(QPoint pos);
+
+  void on_tableFilesToRename_itemDoubleClicked(QTableWidgetItem *item);
+
  signals:
 
  private:
