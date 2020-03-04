@@ -4,6 +4,7 @@
 #include <QDirIterator>
 #include <QFileDialog>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QStatusBar>
 #include <QString>
@@ -25,43 +26,31 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
-  // TODO: DragDrop
-  /*
-    ui->tableResult->setDragEnabled(false);
-    ui->tableExclude->setDragEnabled(false);
+  // DragDrop
+  ui->tableFilesToRename->setDragEnabled(true);
+  ui->tableFilesToRename->setDragDropMode(QAbstractItemView::DragDrop);
+  ui->tableFilesToRename->setAttribute(Qt::WidgetAttribute::WA_AcceptDrops);
+  ui->tableFilesToRename->setDefaultDropAction(Qt::DropAction::MoveAction);
+  ui->tableFilesToRename->setDragDropOverwriteMode(true);
 
-    ui->tableResult->setDragDropMode(QAbstractItemView::NoDragDrop);  //
-    DragOnly ui->tableResult->setDragDropOverwriteMode(false);
-
-    ui->tableExclude->setDragDropMode(QAbstractItemView::NoDragDrop);
-    ui->tableExclude->setDragDropOverwriteMode(false);
-
-    // Grid disabled
-    // ui->tableResult->setShowGrid(false);
-    // ui->tableExclude->setShowGrid(false);
-  */
-  // Enabled sorted
-  ui->tableResult->setSortingEnabled(true);
-  ui->tableExclude->setSortingEnabled(true);
+  // Grid disabled
+  // ui->tableFilesToRename->setShowGrid(false);
 
   // 100% Stretch Column
-  ui->tableResult->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+  ui->tableFilesToRename->verticalHeader()->setSectionResizeMode(
+      QHeaderView::Stretch);
+  ui->tableFilesToRename->horizontalHeader()->setSectionResizeMode(
+      QHeaderView::Stretch);
   ui->tableResult->horizontalHeader()->setSectionResizeMode(
       QHeaderView::Stretch);
 
-  ui->tableExclude->verticalHeader()->setSectionResizeMode(
-      QHeaderView::Stretch);
-  ui->tableExclude->horizontalHeader()->setSectionResizeMode(
-      QHeaderView::Stretch);
-  ui->tableExclude->verticalHeader()->setVisible(false);
-
   // Enable Sorting
+  ui->tableFilesToRename->setSortingEnabled(true);
   ui->tableResult->setSortingEnabled(true);
-  ui->tableExclude->setSortingEnabled(true);
 
   // Sort by Name
-  ui->tableExclude->sortItems(0, Qt::SortOrder::AscendingOrder);
-  ui->tableExclude->sortItems(0, Qt::SortOrder::AscendingOrder);
+  ui->tableFilesToRename->sortItems(0, Qt::SortOrder::AscendingOrder);
+  ui->tableResult->sortItems(1, Qt::SortOrder::AscendingOrder);
 
   // Disable Buttons
   ui->pushButton_DoIt->setDisabled(true);
@@ -72,12 +61,12 @@ MainWindow::MainWindow(QWidget *parent)
   ui->lineEdit_Replace->setDisabled(true);
 
   // Statusbar as Wizard
-  ui->statusbar->showMessage(tr("click button 'select directory'"), 0);
+  QString msg = tr("click button 'select directory'");
+  ui->statusbar->showMessage(msg, 0);
+  ui->labelMessage->setText(msg);
 
-  ui->label_message_doit->setText("");
-  ui->label_message_excludes->setText("");
-  ui->label_message_search->setText("");
-  ui->label_message_replace->setText("");
+  // tableRename Hide
+  ui->tableResult->hide();
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -100,8 +89,10 @@ void MainWindow::on_pushButton_Destination_clicked() {
     ui->lineEdit_Replace->setEnabled(true);
 
     // Statusbar Message
-    ui->statusbar->showMessage(
-        tr("click button collect data. This can take several minutes"), 0);
+    QString msg =
+        tr("click button collect data. This can take several minutes");
+    ui->statusbar->showMessage(msg, 0);
+    ui->labelMessage->setText(msg);
   }
 }
 
@@ -113,70 +104,104 @@ void MainWindow::on_pushButton_Destination_clicked() {
 
 // Disable Collect Data Button;
 void MainWindow::on_pushButton_Collect_pressed() {
+  ui->tableResult->hide();
+  ui->tableFilesToRename->show();
   ui->pushButton_Collect->setDisabled(true);
 }
 
 void MainWindow::on_pushButton_Collect_released() {
   // Clear the Table for New Results
-  ui->tableResult->clearContents();
+  ui->tableFilesToRename->clearContents();
   collectDataFiles.clear();
 
   QString dir = ui->lineEdit_Destination->text();
-  ui->tableResult->setRowCount(0);
-  ui->tableExclude->setRowCount(0);
+  ui->tableFilesToRename->setRowCount(0);
   workerGetFiles(dir);
 
   // Enable Button CollectData
   ui->pushButton_Collect->setDisabled(false);
   ui->pushButton_DoIt->setDisabled(false);
 
-  // Fill tableResult
+  // Fill tableFilesToRename
   int row = 0, col = 0;
   for (int i = 0; i < collectDataFiles.size(); i++) {
-    insertTableResult(row, col, collectDataFiles[i]);
+    insertTableFilesToRename(row, col, collectDataFiles[i]);
     row++;
   }
 
   ui->statusbar->showMessage(tr("You can move files that you want to exclude "
                                 "to the exclude table with doubleclick."),
                              0);
-
   QString message_search =
       tr("Enter a character or word into the search box that you want to "
-         "search.");
-  QString message_replace =
-      tr("Enter a character or word into the replace box.");
-  QString message_exclude =
-      tr("You can move files that you want to exclude to the excludes table "
-         "with doubleclick.");
-  QString message_doit = tr("If you are satisfied, press the 'Do it' button.");
-
-  ui->label_message_search->setText(message_search);
-  ui->label_message_replace->setText(message_replace);
-  ui->label_message_excludes->setText(message_exclude);
-  ui->label_message_doit->setText(message_doit);
+         "search.<br>If you want to use a whitespace as a search or replace "
+         "element, leave one of the input fields empty!");
+  ui->labelMessage->setText(message_search);
 }
 
-void MainWindow::insertTableResult(int row, int col, QString text) {
-  ui->tableResult->insertRow(row);
-  ui->tableResult->setItem(row, col, new QTableWidgetItem(text));
+void MainWindow::insertTableFilesToRename(int row, int col, QString text) {
+  ui->tableFilesToRename->insertRow(row);
+  ui->tableFilesToRename->setItem(row, col, new QTableWidgetItem(text));
 }
 
-void MainWindow::on_tableResult_itemDoubleClicked(QTableWidgetItem *item) {
-  switchTable(item, ui->tableResult, ui->tableExclude);
+void MainWindow::message(QString msg) {
+  QMessageBox::warning(this, tr("Error"), msg, QMessageBox::Ok);
 }
 
-void MainWindow::switchTable(QTableWidgetItem *item, QTableWidget *fromTbl,
-                             QTableWidget *toTbl) {
-  QString itemText = item->text();
-  int rowCountToTbl = toTbl->rowCount();
-  toTbl->insertRow(rowCountToTbl);
-  toTbl->setItem(rowCountToTbl, 0, new QTableWidgetItem(item->text()));
-  fromTbl->removeRow(item->row());
-}
+// Button DoIt
+void MainWindow::on_pushButton_DoIt_clicked() {
+  QString search = ui->lineEdit_Search->text().simplified();
+  QString replace = ui->lineEdit_Replace->text().simplified();
 
-void MainWindow::on_tableExclude_itemDoubleClicked(QTableWidgetItem *item) {
-  switchTable(item, ui->tableExclude, ui->tableResult);
+  QString msg;
+
+  if (search.size() == 0 && replace.size() == 0) {
+    msg = tr("search box or replacement box must not be empty.");
+    message(msg);
+    return;
+  }
+
+  if (search == replace) {
+    msg = tr("search and replace box must not be the same.");
+    message(msg);
+    return;
+  }
+
+  if (search.size() == 0) {
+    search = " ";
+  }
+
+  if (replace.size() == 0) {
+    replace = " ";
+  }
+
+  QString newFilename;
+
+  int rows = ui->tableFilesToRename->rowCount();
+
+  ui->tableFilesToRename->hide();
+  ui->tableResult->show();
+  ui->tableResult->setRowCount(rows);
+
+  int count = 0;
+  for (int row = 0; row < rows; ++row) {
+    QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
+    if (origFileName.contains(search, Qt::CaseInsensitive)) {
+      newFilename = origFileName;
+      newFilename.replace(search, replace);
+      ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
+      ui->tableResult->setItem(row, 1, new QTableWidgetItem(newFilename));
+      // Function for Rename with Threads
+      // Progressbar +1
+      count++;
+    }
+  }
+  // Wait for Thread
+
+  // Set RealRowCount by Result Table and DoIt button disabled
+  ui->tableResult->setRowCount(count);
+  ui->pushButton_DoIt->setDisabled(true);
+  ui->statusbar->clearMessage();
 }
 
 void workerGetFiles(QString dir) {
@@ -195,4 +220,17 @@ void getFiles(QString dir, QStringList *collect) {
     collect->append(it.fileInfo().absoluteFilePath());
     it.next();
   }
+}
+
+void MainWindow::on_lineEdit_Search_editingFinished() {
+  QString message_replace =
+      tr("Enter a character or word into the replace box.");
+  ui->labelMessage->setText(message_replace);
+}
+
+void MainWindow::on_lineEdit_Replace_editingFinished() {
+  QString message_exclude = tr(
+      "You can move files that you want to exclude to the excludes table "
+      "with doubleclick.<br>If you are satisfied, press the 'Do it' button.");
+  ui->labelMessage->setText(message_exclude);
 }
