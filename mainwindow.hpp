@@ -20,23 +20,25 @@ class MainWindow : public QMainWindow {
   ~MainWindow();
 
  private slots:
-  void on_pushButton_Destination_clicked();
-  void on_pushButton_Collect_released();
-  void on_pushButton_Collect_pressed();
-  void on_pushButton_DoIt_clicked();
-  void on_lineEdit_Search_editingFinished();
-  void on_lineEdit_Replace_editingFinished();
   void customMenuRequested(QPoint pos);
+  void on_actionAdd_exclude_triggered();
+  void on_lineEdit_Replace_editingFinished();
+  void on_lineEdit_Search_editingFinished();
+  void on_pushButton_Collect_pressed();
+  void on_pushButton_Collect_released();
+  void on_pushButton_Destination_clicked();
+  void on_pushButton_DoIt_clicked();
   void on_tableFilesToRename_itemDoubleClicked(QTableWidgetItem *item);
   void switchColum(bool trigger);
-
-  void on_actionAdd_exclude_triggered();
 
  signals:
 
  private:
   Ui::MainWindow *ui;
+  void addContextMenu();
+  void defaultSettings();
   void insertTableFilesToRename(int row, int col, QString text);
   void message(QString msg);
+  void tableSetting();
 };
 #endif  // MAINWINDOW_H

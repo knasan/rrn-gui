@@ -20,7 +20,7 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    mainwindow.h
+    mainwindow.hpp
 
 FORMS += \
     mainwindow.ui

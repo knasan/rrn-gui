@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "mainwindow.hpp"
 
 #include <QAction>
 #include <QDebug>
@@ -16,6 +16,7 @@
 
 #include "ui_mainwindow.h"
 
+// Auslagern, auch die Funktionen
 QStringList collectDataFiles;
 void getFiles(QString dir, QStringList *collectDataFiles);
 void workerGetFiles(QString dir);
@@ -24,84 +25,42 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
   ui->setupUi(this);
 
-  // DragDrop
-  ui->tableFilesToRename->setDragEnabled(true);
-
-  // Context Menu
-  ui->tableFilesToRename->setContextMenuPolicy(Qt::CustomContextMenu);
-  QObject::connect(ui->tableFilesToRename,
-                   SIGNAL(customContextMenuRequested(QPoint)),
-                   SLOT(customMenuRequested(QPoint)));
-
-  // ui->tableFilesToRename->setDragDropMode(QAbstractItemView::DragDrop);
-  // ui->tableFilesToRename->setAttribute(Qt::WidgetAttribute::WA_AcceptDrops);
-  // ui->tableFilesToRename->setDefaultDropAction(Qt::DropAction::MoveAction);
-
-  // Disbable Row/Column edit
-  ui->tableFilesToRename->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  ui->tableResult->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-  // Grid disabled
-  // ui->tableFilesToRename->setShowGrid(false);
-
-  // 100% Stretch Column
-  ui->tableFilesToRename->verticalHeader()->setSectionResizeMode(
-      QHeaderView::Stretch);
-  ui->tableFilesToRename->horizontalHeader()->setSectionResizeMode(
-      QHeaderView::Stretch);
-  ui->tableResult->horizontalHeader()->setSectionResizeMode(
-      QHeaderView::Stretch);
-
-  // Enable Sorting
-  ui->tableFilesToRename->setSortingEnabled(false);
-  ui->tableResult->setSortingEnabled(false);
-
-  // Sort by Name
-  ui->tableFilesToRename->sortItems(0, Qt::SortOrder::AscendingOrder);
-  ui->tableResult->sortItems(1, Qt::SortOrder::AscendingOrder);
-
-  // Disable Buttons
-  ui->pushButton_DoIt->setDisabled(true);
-  ui->pushButton_Collect->setDisabled(true);
-
-  // Disable LineEdit
-  ui->lineEdit_Search->setDisabled(true);
-  ui->lineEdit_Replace->setDisabled(true);
-
-  // Statusbar as Wizard
-  QString msg = tr("click button 'select directory'");
-  ui->statusbar->showMessage(msg, 0);
-  ui->labelMessage->setText(msg);
-
-  // tableRename Hide
-  ui->tableResult->hide();
+  tableSetting();
+  defaultSettings();
+  addContextMenu();
 }
 
+// deconstructor
 MainWindow::~MainWindow() { delete ui; }
 
-// Slot PushButton Destination.
-void MainWindow::on_pushButton_Destination_clicked() {
-  QString dir = QFileDialog::getExistingDirectory(
-      this, tr("Open Directory"), QDir().currentPath(),
-      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks |
-          QFileDialog::ReadOnly);
+// Private SLOTS
+void MainWindow::customMenuRequested(QPoint pos) {
+  qDebug() << "CustomMenuRequested, Pos: " << pos;
 
-  if (dir != "") {
-    // Enable Collect button
-    ui->pushButton_Collect->setEnabled(true);
-    // set directory in the LineEdit Destination
-    ui->lineEdit_Destination->setText(dir);
+  // TODO: welche position ist RenameFile und Exclude?
 
-    // Enable Search and Replace LineEdit
-    ui->lineEdit_Search->setEnabled(true);
-    ui->lineEdit_Replace->setEnabled(true);
+  QMenu *menu = new QMenu(this);
+  menu->addAction(tr("add exclude"), this,
+                  SLOT(on_actionAdd_exclude_triggered()));
+  // menu->addAction(new QAction("Action 2", this));
+  menu->popup(ui->tableFilesToRename->viewport()->mapToGlobal(pos));
+}
 
-    // Statusbar Message
-    QString msg =
-        tr("click button collect data. This can take several minutes");
-    ui->statusbar->showMessage(msg, 0);
-    ui->labelMessage->setText(msg);
-  }
+void MainWindow::on_actionAdd_exclude_triggered() {
+  qDebug() << "Exclude trigger";
+}
+
+void MainWindow::on_lineEdit_Replace_editingFinished() {
+  QString message_exclude = tr(
+      "You can move files that you want to exclude to the excludes table "
+      "with doubleclick.<br>If you are satisfied, press the 'Do it' button.");
+  ui->labelMessage->setText(message_exclude);
+}
+
+void MainWindow::on_lineEdit_Search_editingFinished() {
+  QString message_replace =
+      tr("Enter a character or word into the replace box.");
+  ui->labelMessage->setText(message_replace);
 }
 
 /*
@@ -109,7 +68,6 @@ void MainWindow::on_pushButton_Destination_clicked() {
  * pressed
  * released
  */
-
 // Disable Collect Data Button;
 void MainWindow::on_pushButton_Collect_pressed() {
   ui->tableResult->hide();
@@ -147,13 +105,29 @@ void MainWindow::on_pushButton_Collect_released() {
   ui->labelMessage->setText(message_search);
 }
 
-void MainWindow::insertTableFilesToRename(int row, int col, QString text) {
-  ui->tableFilesToRename->insertRow(row);
-  ui->tableFilesToRename->setItem(row, col, new QTableWidgetItem(text));
-}
+// Slot PushButton Destination.
+void MainWindow::on_pushButton_Destination_clicked() {
+  QString dir = QFileDialog::getExistingDirectory(
+      this, tr("Open Directory"), QDir().currentPath(),
+      QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks |
+          QFileDialog::ReadOnly);
 
-void MainWindow::message(QString msg) {
-  QMessageBox::warning(this, tr("Error"), msg, QMessageBox::Ok);
+  if (dir != "") {
+    // Enable Collect button
+    ui->pushButton_Collect->setEnabled(true);
+    // set directory in the LineEdit Destination
+    ui->lineEdit_Destination->setText(dir);
+
+    // Enable Search and Replace LineEdit
+    ui->lineEdit_Search->setEnabled(true);
+    ui->lineEdit_Replace->setEnabled(true);
+
+    // Statusbar Message
+    QString msg =
+        tr("click button collect data. This can take several minutes");
+    ui->statusbar->showMessage(msg, 0);
+    ui->labelMessage->setText(msg);
+  }
 }
 
 // Button DoIt
@@ -211,6 +185,76 @@ void MainWindow::on_pushButton_DoIt_clicked() {
   ui->statusbar->clearMessage();
 }
 
+void MainWindow::switchColum(bool trigger) {
+  qDebug() << "Rename";
+  qDebug() << "Trigger: " << trigger;
+}
+// Private Slot END
+
+// Private Functions
+void MainWindow::addContextMenu() {
+  // Context Menu
+  ui->tableFilesToRename->setContextMenuPolicy(Qt::CustomContextMenu);
+  QObject::connect(ui->tableFilesToRename,
+                   SIGNAL(customContextMenuRequested(QPoint)),
+                   SLOT(customMenuRequested(QPoint)));
+}
+
+void MainWindow::defaultSettings() {
+  // Disable Buttons
+  ui->pushButton_DoIt->setDisabled(true);
+  ui->pushButton_Collect->setDisabled(true);
+
+  // Disable LineEdit
+  ui->lineEdit_Search->setDisabled(true);
+  ui->lineEdit_Replace->setDisabled(true);
+
+  // Statusbar as Wizard
+  QString msg = tr("click button 'select directory'");
+  ui->statusbar->showMessage(msg, 0);
+  ui->labelMessage->setText(msg);
+}
+
+void MainWindow::insertTableFilesToRename(int row, int col, QString text) {
+  ui->tableFilesToRename->insertRow(row);
+  ui->tableFilesToRename->setItem(row, col, new QTableWidgetItem(text));
+}
+
+void MainWindow::message(QString msg) {
+  QMessageBox::warning(this, tr("Error"), msg, QMessageBox::Ok);
+}
+
+void MainWindow::tableSetting() {
+  // DragDrop
+  ui->tableFilesToRename->setDragEnabled(true);
+  // Disbable Row/Column edit
+  ui->tableFilesToRename->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  ui->tableResult->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+  // Grid disabled
+  // ui->tableFilesToRename->setShowGrid(false);
+
+  // 100% Stretch Column
+  ui->tableFilesToRename->verticalHeader()->setSectionResizeMode(
+      QHeaderView::Stretch);
+  ui->tableFilesToRename->horizontalHeader()->setSectionResizeMode(
+      QHeaderView::Stretch);
+  ui->tableResult->horizontalHeader()->setSectionResizeMode(
+      QHeaderView::Stretch);
+
+  // Enable Sorting
+  ui->tableFilesToRename->setSortingEnabled(false);
+  ui->tableResult->setSortingEnabled(false);
+
+  // Sort by Name
+  ui->tableFilesToRename->sortItems(0, Qt::SortOrder::AscendingOrder);
+  ui->tableResult->sortItems(1, Qt::SortOrder::AscendingOrder);
+
+  // tableRename Hide
+  ui->tableResult->hide();
+}
+
+// on This file ....
 void workerGetFiles(QString dir) {
   // collectDataFiles Threaded
   QFuture<void> t1 = QtConcurrent::run(getFiles, dir, &collectDataFiles);
@@ -227,31 +271,6 @@ void getFiles(QString dir, QStringList *collect) {
     collect->append(it.fileInfo().absoluteFilePath());
     it.next();
   }
-}
-
-void MainWindow::on_lineEdit_Search_editingFinished() {
-  QString message_replace =
-      tr("Enter a character or word into the replace box.");
-  ui->labelMessage->setText(message_replace);
-}
-
-void MainWindow::on_lineEdit_Replace_editingFinished() {
-  QString message_exclude = tr(
-      "You can move files that you want to exclude to the excludes table "
-      "with doubleclick.<br>If you are satisfied, press the 'Do it' button.");
-  ui->labelMessage->setText(message_exclude);
-}
-
-void MainWindow::customMenuRequested(QPoint pos) {
-  qDebug() << "CustomMenuRequested, Pos: " << pos;
-
-  // TODO: welche position ist RenameFile und Exclude?
-
-  QMenu *menu = new QMenu(this);
-  menu->addAction(tr("add exclude"), this,
-                  SLOT(on_actionAdd_exclude_triggered()));
-  // menu->addAction(new QAction("Action 2", this));
-  menu->popup(ui->tableFilesToRename->viewport()->mapToGlobal(pos));
 }
 
 void MainWindow::on_tableFilesToRename_itemDoubleClicked(
@@ -274,13 +293,4 @@ void MainWindow::on_tableFilesToRename_itemDoubleClicked(
     qDebug() << "Unknown Column";
   }
   ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(text));
-}
-
-void MainWindow::switchColum(bool trigger) {
-  qDebug() << "Rename";
-  qDebug() << "Trigger: " << trigger;
-}
-
-void MainWindow::on_actionAdd_exclude_triggered() {
-  qDebug() << "Exclude trigger";
 }
