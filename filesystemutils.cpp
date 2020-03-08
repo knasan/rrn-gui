@@ -2,11 +2,9 @@
 
 #include <QDebug>
 #include <QDirIterator>
+#include <QFileInfo>
 
-filesystemUtils::filesystemUtils()
-{
-
-}
+filesystemUtils::filesystemUtils() {}
 
 QStringList filesystemUtils::getFiles(QString dir) {
   QStringList collect;
@@ -25,14 +23,32 @@ QStringList filesystemUtils::getFiles(QString dir) {
 QString filesystemUtils::renameFile(QString fileName, QString search,
                                     QString replace) {
   QString newFileName;
+  QString newFileNameFullPath;
 
   // Was ist wenn das was ich unbennenen möchte ein Hautverzeichnis war?
   // Deswegen muss die Liste schon rückwärts kommen.
 
-  if (fileName.contains(search, Qt::CaseInsensitive)) {
-    newFileName = fileName;
+  // Get BaseName
+  QFile file;
+  QFileInfo fileInfo;
+  QStringList stringlist;
+
+  file.setFileName(fileName);
+  fileInfo.setFile(file);
+
+  QString BaseNameFromFileName = fileInfo.completeBaseName();
+
+  if (BaseNameFromFileName.contains(search, Qt::CaseInsensitive)) {
+    newFileName = BaseNameFromFileName;
     newFileName.replace(search, replace);
+
+    // TODO; wie unter Windows?
+    stringlist << fileInfo.absolutePath() << newFileName;
+    newFileNameFullPath = stringlist.join("/");
+    stringlist.clear();
+    file.rename(newFileNameFullPath);
   }
 
-  return newFileName;
+  // qDebug() << "From: " << fileName << " To: " << newFileName;
+  return newFileNameFullPath;
 }

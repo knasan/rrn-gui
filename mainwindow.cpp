@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QFileDialog>
-#include <QFuture>
 #include <QFutureWatcher>
 #include <QLineEdit>
 #include <QMessageBox>
@@ -164,8 +163,8 @@ void MainWindow::on_pushButton_DoIt_clicked() {
 
   filesystemUtils fsu;
 
+  ui->tableFilesToRename->sortItems(Qt::SortOrder::DescendingOrder);
   for (int row = rows - 1; row >= 0; --row) {
-    // qDebug() << "Row: " << row;
     QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
     QString newFilename = fsu.renameFile(origFileName, search, replace);
     ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
@@ -176,6 +175,8 @@ void MainWindow::on_pushButton_DoIt_clicked() {
     }
     // qDebug() << "o: " << origFileName << " To: " << newFilename;
   }
+  ui->tableFilesToRename->sortItems(Qt::SortOrder::AscendingOrder);
+
   // Set RealRowCount by Result Table and DoIt button disabled
   ui->pushButton_DoIt->setDisabled(true);
   ui->statusbar->clearMessage();
