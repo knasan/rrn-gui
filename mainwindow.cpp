@@ -4,6 +4,8 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QFileDialog>
+#include <QFuture>
+#include <QFutureWatcher>
 #include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
@@ -11,15 +13,10 @@
 #include <QString>
 #include <QTableWidget>
 #include <QTableWidgetItem>
-#include <QThread>
 #include <QtConcurrent>
 
+#include <filesystemutils.hpp>
 #include "ui_mainwindow.h"
-
-// Auslagern, auch die Funktionen
-QStringList collectDataFiles;
-void getFiles(QString dir, QStringList *collectDataFiles);
-void workerGetFiles(QString dir);
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow) {
@@ -78,11 +75,13 @@ void MainWindow::on_pushButton_Collect_pressed() {
 void MainWindow::on_pushButton_Collect_released() {
   // Clear the Table for New Results
   ui->tableFilesToRename->clearContents();
-  collectDataFiles.clear();
-
   QString dir = ui->lineEdit_Destination->text();
   ui->tableFilesToRename->setRowCount(0);
-  workerGetFiles(dir);
+
+  // TODO: Start getFiles with QFuture
+  QString dirpath = ui->lineEdit_Destination->text();
+  filesystemUtils fsu;
+  QStringList collectDataFiles = fsu.getFiles(dirpath);
 
   // Enable Button CollectData
   ui->pushButton_Collect->setDisabled(false);
@@ -157,32 +156,51 @@ void MainWindow::on_pushButton_DoIt_clicked() {
     replace = " ";
   }
 
-  QString newFilename;
-
   int rows = ui->tableFilesToRename->rowCount();
 
   ui->tableFilesToRename->hide();
   ui->tableResult->show();
   ui->tableResult->setRowCount(rows);
 
-  for (int row = 0; row < rows; ++row) {
-    QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
-    if (origFileName.contains(search, Qt::CaseInsensitive)) {
-      newFilename = origFileName;
-      newFilename.replace(search, replace);
-      ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
-      ui->tableResult->setItem(row, 1, new QTableWidgetItem(newFilename));
-      // Function for Rename with Threads
-      // Progressbar +1
-    } else {
-      ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
-    }
-  }
-  // Wait for Thread
+  filesystemUtils fsu;
 
+  for (int row = rows - 1; row >= 0; --row) {
+    // qDebug() << "Row: " << row;
+    QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
+    QString newFilename = fsu.renameFile(origFileName, search, replace);
+    ui->tableResult->setItem(row, 0, new QTableWidgetItem(origFileName));
+    if (newFilename != "") {
+      ui->tableResult->setItem(row, 1, new QTableWidgetItem(newFilename));
+    } else {
+      ui->tableResult->setItem(row, 1, new QTableWidgetItem(origFileName));
+    }
+    // qDebug() << "o: " << origFileName << " To: " << newFilename;
+  }
   // Set RealRowCount by Result Table and DoIt button disabled
   ui->pushButton_DoIt->setDisabled(true);
   ui->statusbar->clearMessage();
+}
+
+void MainWindow::on_tableFilesToRename_itemDoubleClicked(
+    QTableWidgetItem *item) {
+  int column = item->column();
+  int row = item->row();
+  QString text = item->text();
+  if (text == "") {
+    return;
+  }
+  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(""));
+  // Column 0 is FiletoRename, 1 is Exclude
+  if (column == 0) {
+    // FilesToRename -> exclude
+    column++;
+  } else if (column == 1) {
+    // Exclude <- FilesToRename
+    column--;
+  } else {
+    qDebug() << "Unknown Column";
+  }
+  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(text));
 }
 
 void MainWindow::switchColum(bool trigger) {
@@ -252,45 +270,4 @@ void MainWindow::tableSetting() {
 
   // tableRename Hide
   ui->tableResult->hide();
-}
-
-// on This file ....
-void workerGetFiles(QString dir) {
-  // collectDataFiles Threaded
-  QFuture<void> t1 = QtConcurrent::run(getFiles, dir, &collectDataFiles);
-  t1.waitForFinished();
-}
-
-void getFiles(QString dir, QStringList *collect) {
-  QDirIterator it(dir, QDirIterator::Subdirectories);
-  while (it.hasNext()) {
-    if (it.fileName() == "." || it.fileName() == ".." || it.fileName() == "") {
-      it.next();
-      continue;
-    }
-    collect->append(it.fileInfo().absoluteFilePath());
-    it.next();
-  }
-}
-
-void MainWindow::on_tableFilesToRename_itemDoubleClicked(
-    QTableWidgetItem *item) {
-  int column = item->column();
-  int row = item->row();
-  QString text = item->text();
-  if (text == "") {
-    return;
-  }
-  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(""));
-  // Column 0 is FiletoRename, 1 is Exclude
-  if (column == 0) {
-    // FilesToRename -> exclude
-    column++;
-  } else if (column == 1) {
-    // Exclude <- FilesToRename
-    column--;
-  } else {
-    qDebug() << "Unknown Column";
-  }
-  ui->tableFilesToRename->setItem(row, column, new QTableWidgetItem(text));
 }

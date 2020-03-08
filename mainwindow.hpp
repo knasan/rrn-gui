@@ -6,6 +6,8 @@
 #include <QMenu>
 #include <QTableWidget>
 
+#include <filesystemutils.hpp>
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -40,5 +42,7 @@ class MainWindow : public QMainWindow {
   void insertTableFilesToRename(int row, int col, QString text);
   void message(QString msg);
   void tableSetting();
+
+  filesystemUtils fsu;
 };
 #endif  // MAINWINDOW_H
