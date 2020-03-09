@@ -7,6 +7,11 @@
 
 filesystemUtils::filesystemUtils() {}
 
+/**
+ * @brief filesystemUtils::getFiles
+ * @param dir
+ * @return
+ */
 QStringList filesystemUtils::getFiles(QString dir) {
   QStringList collect;
   QDirIterator it(dir, QDirIterator::Subdirectories);
@@ -15,7 +20,6 @@ QStringList filesystemUtils::getFiles(QString dir) {
     if (it.fileName() == "" || it.fileName() == "." || it.fileName() == "..") {
       continue;
     }
-    // qDebug() << "FileName: " << it.fileInfo();
     if (it.fileInfo().absolutePath().contains(dir)) {
       collect.append(it.fileInfo().absoluteFilePath());
     } else {
@@ -27,25 +31,23 @@ QStringList filesystemUtils::getFiles(QString dir) {
   return collect;
 }
 
+/**
+ * @brief filesystemUtils::renameFile
+ * @param fileName
+ * @param search
+ * @param replace
+ * @return
+ */
 QString filesystemUtils::renameFile(QString fileName, QString search,
                                     QString replace) {
   QString newFileName;
   QString newFileNameFullPath;
-
-  // Was ist wenn das was ich unbennenen möchte ein Hautverzeichnis war?
-  // Deswegen muss die Liste schon rückwärts kommen.
-
-  // Get BaseName
   QFile file;
   QFileInfo fileInfo;
   QStringList stringlist;
 
   file.setFileName(fileName);
   fileInfo.setFile(file);
-
-  /*qDebug() << "Search:  " << search;
-  qDebug() << "Replace: " << replace;
-  qDebug() << "FileName: " << fileName;*/
 
   if (fileInfo.isDir()) {
     if (fileName.contains(search, Qt::CaseInsensitive)) {
@@ -66,15 +68,12 @@ QString filesystemUtils::renameFile(QString fileName, QString search,
   if (BaseNameFromFileName.contains(search, Qt::CaseInsensitive)) {
     newFileName = BaseNameFromFileName;
     newFileName.replace(search, replace);
-
-    // TODO; wie unter Windows?
     stringlist << fileInfo.absolutePath() << newFileName + "." + FileExtension;
-
     newFileNameFullPath = stringlist.join("/");
     stringlist.clear();
     file.rename(newFileNameFullPath);
   }
 
-  // qDebug() << "From: " << fileName << " To: " << newFileName;
+  qDebug() << "From: " << fileName << " To: " << newFileName;
   return newFileNameFullPath;
 }

@@ -1,5 +1,5 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef MAINWINDOW_HPP
+#define MAINWINDOW_HPP
 
 #include <QAction>
 #include <QMainWindow>
@@ -47,4 +47,4 @@ class MainWindow : public QMainWindow {
 
   filesystemUtils fsu;
 };
-#endif  // MAINWINDOW_H
+#endif  // MAINWINDOW_HPP
