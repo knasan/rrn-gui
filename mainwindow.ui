@@ -285,6 +285,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_Rollback">
+        <property name="text">
+         <string>Rollback</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer_ButtomButton_mid">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -317,7 +324,7 @@
      <x>0</x>
      <y>0</y>
      <width>768</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
   </widget>

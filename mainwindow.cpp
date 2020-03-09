@@ -13,8 +13,8 @@
 #include <QTableWidget>
 #include <QTableWidgetItem>
 #include <QtConcurrent>
-
 #include <filesystemutils.hpp>
+
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -72,6 +72,7 @@ void MainWindow::on_pushButton_Collect_pressed() {
 }
 
 void MainWindow::on_pushButton_Collect_released() {
+  ui->pushButton_Rollback->setDisabled(true);
   // Clear the Table for New Results
   ui->tableFilesToRename->clearContents();
   QString dir = ui->lineEdit_Destination->text();
@@ -155,14 +156,22 @@ void MainWindow::on_pushButton_DoIt_clicked() {
     replace = " ";
   }
 
-  int rows = ui->tableFilesToRename->rowCount();
-
   ui->tableFilesToRename->hide();
   ui->tableResult->show();
+
+  renameFilesFromTable(search, replace);
+
+  // Set RealRowCount by Result Table and DoIt button disabled
+  ui->pushButton_DoIt->setDisabled(true);
+  ui->statusbar->clearMessage();
+  // RollBack Enabled
+  ui->pushButton_Rollback->setDisabled(false);
+}
+
+void MainWindow::renameFilesFromTable(QString search, QString replace) {
+  int rows = ui->tableFilesToRename->rowCount();
   ui->tableResult->setRowCount(rows);
-
   filesystemUtils fsu;
-
   ui->tableFilesToRename->sortItems(Qt::SortOrder::DescendingOrder);
   for (int row = rows - 1; row >= 0; --row) {
     QString origFileName = ui->tableFilesToRename->takeItem(row, 0)->text();
@@ -173,13 +182,9 @@ void MainWindow::on_pushButton_DoIt_clicked() {
     } else {
       ui->tableResult->setItem(row, 1, new QTableWidgetItem(origFileName));
     }
-    // qDebug() << "o: " << origFileName << " To: " << newFilename;
+    qDebug() << "From: " << origFileName << " To: " << newFilename;
   }
   ui->tableFilesToRename->sortItems(Qt::SortOrder::AscendingOrder);
-
-  // Set RealRowCount by Result Table and DoIt button disabled
-  ui->pushButton_DoIt->setDisabled(true);
-  ui->statusbar->clearMessage();
 }
 
 void MainWindow::on_tableFilesToRename_itemDoubleClicked(
@@ -223,6 +228,7 @@ void MainWindow::defaultSettings() {
   // Disable Buttons
   ui->pushButton_DoIt->setDisabled(true);
   ui->pushButton_Collect->setDisabled(true);
+  ui->pushButton_Rollback->setDisabled(true);
 
   // Disable LineEdit
   ui->lineEdit_Search->setDisabled(true);
@@ -271,4 +277,18 @@ void MainWindow::tableSetting() {
 
   // tableRename Hide
   ui->tableResult->hide();
+}
+
+void MainWindow::on_pushButton_Rollback_clicked() {
+  // Switch Search and Replace
+  QString search = ui->lineEdit_Search->text();
+  QString replace = ui->lineEdit_Replace->text();
+
+  ui->lineEdit_Search->setText(replace);
+  ui->lineEdit_Replace->setText(search);
+  // renameFilesFromTable(replace, search);
+  // ui->pushButton_Rollback->setDisabled(true);
+  // Files neu einlesen
+  on_pushButton_Collect_released();
+  ui->pushButton_DoIt->setDisabled(false);
 }

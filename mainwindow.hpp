@@ -5,7 +5,6 @@
 #include <QMainWindow>
 #include <QMenu>
 #include <QTableWidget>
-
 #include <filesystemutils.hpp>
 
 QT_BEGIN_NAMESPACE
@@ -30,8 +29,11 @@ class MainWindow : public QMainWindow {
   void on_pushButton_Collect_released();
   void on_pushButton_Destination_clicked();
   void on_pushButton_DoIt_clicked();
+  void renameFilesFromTable(QString search, QString replace);
   void on_tableFilesToRename_itemDoubleClicked(QTableWidgetItem *item);
   void switchColum(bool trigger);
+
+  void on_pushButton_Rollback_clicked();
 
  signals:
 

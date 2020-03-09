@@ -10,7 +10,7 @@ QStringList filesystemUtils::getFiles(QString dir) {
   QStringList collect;
   QDirIterator it(dir, QDirIterator::Subdirectories);
   while (it.hasNext()) {
-    if (it.fileName() == "." || it.fileName() == ".." || it.fileName() == "") {
+    if (it.fileName() == "" || it.fileName() == "..") {
       it.next();
       continue;
     }
@@ -36,14 +36,29 @@ QString filesystemUtils::renameFile(QString fileName, QString search,
   file.setFileName(fileName);
   fileInfo.setFile(file);
 
-  QString BaseNameFromFileName = fileInfo.completeBaseName();
+  if (fileInfo.isDir()) {
+    if (fileName.contains(search, Qt::CaseInsensitive)) {
+      newFileName = fileName;
+      newFileName.replace(search, replace);
+      if (newFileName == "") {
+        return newFileName;
+      }
+      file.rename(newFileName);
+      return newFileName;
+    }
+    return fileName;
+  }
+
+  QString BaseNameFromFileName = fileInfo.baseName();
+  QString FileExtension = fileInfo.suffix();
 
   if (BaseNameFromFileName.contains(search, Qt::CaseInsensitive)) {
     newFileName = BaseNameFromFileName;
     newFileName.replace(search, replace);
 
     // TODO; wie unter Windows?
-    stringlist << fileInfo.absolutePath() << newFileName;
+    stringlist << fileInfo.absolutePath() << newFileName + "." + FileExtension;
+
     newFileNameFullPath = stringlist.join("/");
     stringlist.clear();
     file.rename(newFileNameFullPath);
