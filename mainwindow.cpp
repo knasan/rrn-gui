@@ -182,7 +182,7 @@ void MainWindow::renameFilesFromTable(QString search, QString replace) {
     } else {
       ui->tableResult->setItem(row, 1, new QTableWidgetItem(origFileName));
     }
-    qDebug() << "From: " << origFileName << " To: " << newFilename;
+    // qDebug() << "From: " << origFileName << " To: " << newFilename;
   }
   ui->tableFilesToRename->sortItems(Qt::SortOrder::AscendingOrder);
 }
@@ -286,9 +286,9 @@ void MainWindow::on_pushButton_Rollback_clicked() {
 
   ui->lineEdit_Search->setText(replace);
   ui->lineEdit_Replace->setText(search);
-  // renameFilesFromTable(replace, search);
-  // ui->pushButton_Rollback->setDisabled(true);
+
   // Files neu einlesen
   on_pushButton_Collect_released();
   ui->pushButton_DoIt->setDisabled(false);
+  on_pushButton_DoIt_clicked();
 }

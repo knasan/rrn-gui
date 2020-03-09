@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QDirIterator>
 #include <QFileInfo>
+#include <QString>
 
 filesystemUtils::filesystemUtils() {}
 
@@ -10,13 +11,19 @@ QStringList filesystemUtils::getFiles(QString dir) {
   QStringList collect;
   QDirIterator it(dir, QDirIterator::Subdirectories);
   while (it.hasNext()) {
-    if (it.fileName() == "" || it.fileName() == "..") {
-      it.next();
+    it.next();
+    if (it.fileName() == "" || it.fileName() == "." || it.fileName() == "..") {
       continue;
     }
-    collect.append(it.fileInfo().absoluteFilePath());
-    it.next();
+    // qDebug() << "FileName: " << it.fileInfo();
+    if (it.fileInfo().absolutePath().contains(dir)) {
+      collect.append(it.fileInfo().absoluteFilePath());
+    } else {
+      qDebug() << it.fileInfo();
+    }
   }
+  collect.removeDuplicates();
+  collect.sort(Qt::CaseInsensitive);
   return collect;
 }
 
@@ -35,6 +42,10 @@ QString filesystemUtils::renameFile(QString fileName, QString search,
 
   file.setFileName(fileName);
   fileInfo.setFile(file);
+
+  /*qDebug() << "Search:  " << search;
+  qDebug() << "Replace: " << replace;
+  qDebug() << "FileName: " << fileName;*/
 
   if (fileInfo.isDir()) {
     if (fileName.contains(search, Qt::CaseInsensitive)) {
